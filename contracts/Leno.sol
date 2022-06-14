@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Leno is ERC721, Ownable {
-    uint256 count;
+   
     address public immutable paymentToken;
     uint256 tokenPrice = 10;
     uint256 rebate = 15;
@@ -27,15 +27,15 @@ contract Leno is ERC721, Ownable {
     function mintToken(address to, uint256 idToken) public {
         require(IERC20(paymentToken).transferFrom(msg.sender, address(this), tokenPrice),"Fail transfer");
         _mint(to, idToken);
-        count += 1;
     }
 
     function numberTokens (address to, uint256 idToken, uint256 number) public {
-        tokenPrice = tokenPrice-((tokenPrice*rebate)/100);
+        uint256 totalTokenPrice = number*(tokenPrice);
+        totalTokenPrice = totalTokenPrice-(totalTokenPrice*rebate)/100;
+        require(IERC20(paymentToken).transferFrom(msg.sender, address(this), totalTokenPrice),"Fail transfer");
         for(uint256 i=0; number < i; i++){
-            mintToken(to, idToken);
+            _mint(to, idToken);
+            idToken += 1;
         }
-        tokenPrice = 10;
     }    
-    
 }
