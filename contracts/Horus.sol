@@ -7,15 +7,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Horus is ERC20, Ownable{
 
+    event rewardRecive (address indexed staker, uint256 amount);
+    uint256 public mintAmount = 100;
     mapping (address => mapping(uint256 => uint256)) lockTokens;
-    address public paymentToken;
-
-    constructor() ERC20("Horus", "HRS"){}
+    mapping (address => bool) addressUse;
+    address public stakingContract;
+    
+    constructor() ERC20("Horus", "HRS"){
+        mint(msg.sender, 10000);
+    }
 
     function mint(address account,uint256 amount) public onlyOwner{
         _mint(account,amount);
     }
-
 
     function burn(address , uint256 amount) public onlyOwner{
         _burn(msg.sender,amount);
@@ -25,8 +29,27 @@ contract Horus is ERC20, Ownable{
         uint256 rewards = (block.timestamp-lockTokens[msg.sender][amount])/100;
         _mint(msg.sender, rewards);
         lockTokens[msg.sender][amount]=block.timestamp;
+
+        emit rewardRecive(msg.sender, rewards);
     }
     
+    function setStakingContract(address _stakingContract) public onlyOwner {
+        stakingContract = _stakingContract; 
+    }
+
+    function oneMint(address recipient) public returns (bool) {
+        require(!addressUse[msg.sender], "Address already is used");
+        addressUse[msg.sender] = true;
+        _mint(recipient, mintAmount);
+        return true;
+    }
+
+    function mintForStaking(address recipient, uint256 amount) public returns (bool) {
+        require(msg.sender == stakingContract, "only staking contract is allowed");
+         _mint(recipient, amount);
+         return true;
+    }
+
     function deposit(uint256 amount) public{
         lockTokens[msg.sender][amount]=block.timestamp;
         _transfer(msg.sender, address(this), amount);

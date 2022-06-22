@@ -8,9 +8,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Leno is ERC721, Ownable {
    
     address public immutable paymentToken;
-    uint256 tokenPrice = 10;
-    uint256 rebate = 15;
-
+    uint256 public tokenPrice = 10;
+    uint256 public rebate = 15;
 
     constructor(address _paymentToken) ERC721("Leno", "LEN"){
         paymentToken = _paymentToken;
